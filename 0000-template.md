@@ -53,7 +53,7 @@ And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requ
 ///
 /// While seemingly simple, this capability gives you access to a large number
 /// of operations that you can perform on any iterable. As an example, to
-/// check whether an Iterable includes a particular value, you can test each
+/// check whether an iterable includes a particular value, you can test each
 /// value sequentially until you've found a match or reached the end of the
 /// `Iterable`'s iterator. This example checks to see whether a particular insect is in an
 /// array.
@@ -73,7 +73,7 @@ And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requ
 /// operations that depend on sequential access to a sequence's values. For
 /// clearer, more concise code, the example above could use the array's
 /// `contains(_:)` method, which performs the iteration for you 
-/// as every Iterable inherits it from `Iterable` instead of iterating manually:
+/// as every iterable inherits it from `Iterable` instead of iterating manually:
 ///
 ///     if bugs.contains("Mosquito") {
 ///         print("Break out the bug spray.")
@@ -89,19 +89,19 @@ And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requ
 /// whether they have a standardized, or even deterministic iteration order.
 /// However, it does gaurantee that if it's iterator's `.next()` is caled until
 /// it returns `nil` it will return each element exactly once for each time the
-/// Iterable contains that element. As a consequence, don't assume that whether
-/// or not one element preceeds annother is a sensible question.
-/// for example, even if a `.copy()` method exists with expected semantics:
+/// iterable contains that element. As a consequence, don't assume that whether
+/// or not one element preceeds annother is a sensible question. for example, even
+/// if a `.copy()` method exists with expected semantics (and Element is Equatable):
 ///
-///     let a, b: type(of: Iterable).Element
+///     let a, b: type(of: iterable).Element
 ///
-///     for element in Iterable.copy() {
+///     for element in iterable.copy() {
 ///         a = element
 ///         break
 ///     }
 ///
-///     for element in Iterable {
-///         a = element
+///     for element in iterable {
+///         b = element
 ///         break
 ///     }
 ///
@@ -113,7 +113,7 @@ And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requ
 ///     }
 ///
 /// In this case, you cannot assume either an iterable is a sequence and the
-/// elements will be equal, or that an Iterable will have been reordered and
+/// elements will be equal, or that an iterable will have been reordered and
 /// the elements will be unequal. A conforming iterable that is
 /// not a sequence is allowed to produce elements in an arbitrary order.
 ///
@@ -143,7 +143,7 @@ And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requ
 /// in the second `for`-`in` loop.
 ///
 /// To establish that a type you've created supports nondestructive iteration,
-/// add conformance to the `Collection` protocol.
+/// add conformance to a collection protocol.
 ///
 /// Conforming to the Iterable Protocol
 /// ===================================
@@ -234,6 +234,33 @@ protocol Iterable /*: Compiler_ForIn_Able*/ {
   /// - Parameter body: A closure that takes an element of the sequence as a
   ///   parameter.
   func forEach(_ body: (Element) throws -> Void) rethrows  
+}
+
+///...
+/// Ordered Access
+/// ===============
+///
+/// The `Sequence` protocol requires conforming types have an order that is 
+/// preserved by equality. As a consequence, one whether or not one element
+/// preceeds annother is a sensible question. for example, even if a `.copy()`
+/// method exists with expected semantics (and Element is Equatable):
+///
+///     let a, b: type(of: sequence).Element
+///
+///     for element in sequence.copy() {
+///         a = element
+///         break
+///     }
+///
+///     for element in sequence {
+///         b = element
+///         break
+///     }
+///
+///     assert(a == b, "\(sequence) is not a valid Sequence")
+///...
+protocol Sequence: Iterable {
+  ...
 }
 
 struct UniformRandomNumbers: Iterable, Iterator {
