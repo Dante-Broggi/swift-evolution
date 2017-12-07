@@ -39,7 +39,7 @@ And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requ
 ```swift
 /// A type that provides iterated access to its elements.
 ///
-/// An Iterable abstractly contains values that you can step through. The
+/// An iterable abstractly contains values that you can step through. The
 /// most common way to iterate over the elements of a sequence is to use a
 /// `for`-`in` loop:
 ///
@@ -55,8 +55,8 @@ And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requ
 /// of operations that you can perform on any iterable. As an example, to
 /// check whether an iterable includes a particular value, you can test each
 /// value sequentially until you've found a match or reached the end of the
-/// `Iterable`'s iterator. This example checks to see whether a particular insect is in an
-/// array.
+/// Iterable's iterator. This example checks to see whether a particular 
+/// insect is in an array.
 ///
 ///     let bugs = ["Aphid", "Bumblebee", "Cicada", "Damselfly", "Earwig"]
 ///     var hasMosquito = false
@@ -326,7 +326,7 @@ This proposal has no ABI concerns.
 
 ## Effect on API resilience
 
-This proposal changes API in a compatible way: extracting a new root for a protocol tree, adding 2 new possibly public types, and, if desired, adding new requirements for a type that all have default implementations.
+This proposal changes API in a compatible way: extracting a new root for a protocol tree, possibly adding 2 new public types, and, if desired, adding new requirements for a type that all have default implementations.
 
 ## Alternatives considered
 
