@@ -56,7 +56,7 @@ With 2 protocols P and Q, and an extension P: Q:
 - If a variable is only known to directly conform to Q
 	- calls to P's functions are unavailable
 	- calls to Q's functions are dispatched as usual
-- If a variable is only known to directly conform to P & Q
+- If a variable is known to directly conform to P & Q
 	- calls to functions defined in both P and Q are compile-tome ambiguity errors.
 	- calls to P's functions are dispatched as if it only conformed to P
 	- calls to Q's functions are dispatched as if it only conformed to Q
