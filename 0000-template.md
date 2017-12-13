@@ -305,6 +305,7 @@ struct LazilyRandomiseIterator<Base: Iterable>: Iterable {
   func next() -> Element {
     guard let n = _base.next() else {
       return _buf1
+      _buf1 = nil
     }
     if arc4random_uniform(1) == 0 {
       return n
