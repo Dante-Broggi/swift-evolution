@@ -36,12 +36,225 @@ Add stricter semantic conditions to `Collection` to emphasize the new distinctio
 
 ## Detailed design
 
-Describe the design of the solution in detail. If it involves new
-syntax in the language, show the additions and changes to the Swift
-grammar. If it's a new API, show the full API and its documentation
-comments detailing what it does. The detail in this section should be
-sufficient for someone who is *not* one of the authors to be able to
-reasonably implement the feature.
+```swift
+/// An iterable whose elements can be traversed multiple times,
+/// nondestructively, and accessed by an indexed subscript.
+///
+/// UnorderedCollections are used throughout the standard library. When you
+/// use sets, dictionaries, and other unordered collections, you benefit from the
+/// operations that the `UnorderedCollection` protocol declares and implements.
+/// In addition to the operations that collections inherit from the `Iterable`
+/// protocol, you gain access to methods that depend on accessing an element
+/// at a specific position in a collection.
+///
+/// For example, if you want to print only the first word in a string, you can
+/// search for the index of the first space, and then create a substring up to
+/// that position.
+///
+///     let text = "Buffalo buffalo buffalo buffalo."
+///     if let firstSpace = text.index(of: " ") {
+///         print(text[..<firstSpace])
+///     }
+///     // Prints "Buffalo"
+///
+/// The `firstSpace` constant is an index into the `text` string---the position
+/// of the first space in the string. You can store indices in variables, and
+/// pass them to collection algorithms or use them later to access the
+/// corresponding element. In the example above, `firstSpace` is used to
+/// extract the prefix that contains elements up to that index.
+///
+/// Accessing Individual Elements
+/// =============================
+///
+/// You can access an element of a collection through its subscript by using
+/// any valid index, except the collection's `endIndex` property, if it has one.
+/// This property is a "past the end" index that does not correspond with any element of the
+/// collection, an is defined by `Collection`.
+///
+/// Here's an example of accessing the first character in a string through its
+/// subscript:
+///
+///     let firstChar = text[text.startIndex]
+///     print(firstChar)
+///     // Prints "B"
+///
+/// The `UnorderedCollection` protocol declares and provides default implementations for
+/// many operations that depend on elements being accessible by their
+/// subscript.
+///
+/// You can pass only valid indices to collection operations. Any index returned
+/// by a method that starts with `index` in this protocol are valid indices.
+/// This protocol does not define whether any other values of the `Index` type are valid,
+/// or invalid, indices for this collection.
+///
+/// Saved indices may become invalid as a result of mutating operations. For
+/// more information about index invalidation in mutable collections, see the
+/// reference for the `MutableCollection` and `RangeReplaceableCollection`
+/// protocols, as well as for the specific type you're using.
+///
+/// Traversing an UnorderedCollection
+/// =======================
+///
+/// Although an Iterable can be consumed as it is traversed, a collection is
+/// guaranteed to be *multipass*: Any element can be repeatedly accessed by
+/// saving its index. Moreover, a collection's indices form a finite range of
+/// the positions of the collection's elements. The fact that all collections
+/// are finite guarantees the safety of many of Iterable's operations, such as
+/// using the `contains(_:)` method to test whether a collection includes an
+/// element.
+///
+/// Iterating over the elements of a collection by their positions yields the
+/// same elements in the same order as iterating over that collection using
+/// its iterator. This example demonstrates that the `characters` view of a
+/// string returns the same characters in the same order whether the view's
+/// indices or the view itself is being iterated.
+///
+///     let word = "Swift"
+///     for character in word {
+///         print(character)
+///     }
+///     // Prints "S"
+///     // Prints "w"
+///     // Prints "i"
+///     // Prints "f"
+///     // Prints "t"
+///
+///     for i in word.indices {
+///         print(word[i])
+///     }
+///     // Prints "S"
+///     // Prints "w"
+///     // Prints "i"
+///     // Prints "f"
+///     // Prints "t"
+///
+/// Conforming to the UnorderedCollection Protocol
+/// =====================================
+///
+/// If you create a custom iterable that can provide repeated access to its
+/// elements, make sure that its type conforms to the `UnorderedCollection`
+/// protocol in order to give a more useful and more efficient interface for
+/// iteration and collection operations. To add `UnorderedCollection conformance
+/// to your type, you must declare at least the following requirements:
+///
+/// - A subscript and an iterator that provide at least read-only access to
+///   your type's elements
+///
+/// - An Indices type and property that provide at least read-only access to
+///   your type's indices
+///
+/// Expected Performance
+/// ====================
+///
+/// Types that conform to `Collection` are expected to provide subscript access
+/// to elements as O(1) operations. Types that are not able to guarantee this
+/// performance must document the departure, because many collection operations
+/// depend on O(1) subscripting performance for their own performance guarantees.
+///
+/// The performance of some collection operations depends on the type of index
+/// that the collection provides. For example, because a forward
+/// or bidirectional collection must traverse the entire collection to count
+/// the number of contained elements, accessing its `count` property is an
+/// O(*n*) operation.
+public protocol UnorderedCollection: Sequence { //Iterable
+    associatedtype Element
+
+    /// A type that represents a position in the collection.
+    ///
+    /// Valid indices consist of the position of every element and a
+    /// "past the end" position that's not valid for use as a subscript
+    /// argument.
+    associatedtype Index
+
+    /// A type that provides the collection's iteration interface and
+    /// encapsulates its iteration state.
+    associatedtype Iterator: Sequence
+
+    /// Returns an iterator over the elements of the collection.
+    func makeIterator() -> Iterator
+
+    /// Accesses the element at the specified position.
+    ///
+    /// The following example accesses an element of an array through its
+    /// subscript to print its value:
+    ///
+    ///     var streets = ["Adams", "Bryant", "Channing", "Douglas", "Evarts"]
+    ///     print(streets[1])
+    ///     // Prints "Bryant"
+    ///
+    /// You can subscript a collection with any valid index
+    ///
+    /// - Parameter position: The position of the element to access. `position`
+    ///   must be a valid index of the collection.
+    ///
+    /// - Complexity: O(1)
+    subscript(position: Index) -> Element { get }
+
+    /// A type that represents the indices that are valid for subscripting the
+    /// collection.
+    associatedtype Indices : UnorderedCollection
+    where Indices.Element == Index,
+    Indices.Index == Index
+
+    /// The indices that are valid for subscripting the collection
+    ///
+    /// A collection's `indices` property can hold a strong reference to the
+    /// collection itself, causing the collection to be nonuniquely referenced.
+    /// If you mutate the collection while iterating over its indices, a strong
+    /// reference can result in an unexpected copy of the collection.
+    var indices: Indices { get }
+
+    /// A Boolean value indicating whether the collection is empty.
+    ///
+    /// When you need to check whether your collection is empty, use the
+    /// `isEmpty` property instead of checking that the `count` property is
+    /// equal to zero. For collections that don't conform to
+    /// `RandomAccessCollection`, accessing the `count` property iterates
+    /// through the elements of the collection.
+    ///
+    ///     let horseName = "Silver"
+    ///     if horseName.isEmpty {
+    ///         print("I've been through the desert on a horse with no name.")
+    ///     } else {
+    ///         print("Hi ho, \(horseName)!")
+    ///     }
+    ///     // Prints "Hi ho, Silver!")
+    ///
+    /// - Complexity: O(1)
+    var isEmpty: Bool { get }
+
+    /// The number of elements in the collection.
+    ///
+    /// To check whether a collection is empty, use its `isEmpty` property
+    /// instead of comparing `count` to zero. Unless the collection guarantees
+    /// random-access performance, calculating `count` can be an O(*n*)
+    /// operation.
+    ///
+    /// - Complexity: O(1) if the collection conforms to
+    ///   `RandomAccessCollection`; otherwise, O(*n*), where *n* is the length
+    ///   of the collection.
+    var count: Int { get }
+}
+
+///...
+public protocol Collection: OrderedCollection, Sequence {
+
+    /// The first element of the collection.
+    ///
+    /// Two equal colections (a, b) must have a.first == b.first return true
+    ///
+    /// If the collection is empty, the value of this property is `nil`.
+    ///
+    ///     let numbers = [10, 20, 30, 40, 50]
+    ///     if let firstNumber = numbers.first {
+    ///         print(firstNumber)
+    ///     }
+    ///     // Prints "10"
+    var first: Element? { get }
+
+    ///...
+}
+```
 
 ## Source compatibility
 
@@ -57,6 +270,5 @@ This proposal changes API in a compatible way: inserting a new protocol in a tre
 
 ## Alternatives considered
 
-Describe alternative approaches to addressing the same problem, and
-why you chose this approach instead.
+Do nothing, and live with the ambiguity between ordered and unordered collections.
 
