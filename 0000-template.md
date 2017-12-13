@@ -1,7 +1,7 @@
-# Feature name
+# Unordered Collections
 
 * Proposal: [SE-NNNN](NNNN-filename.md)
-* Authors: [Author 1](https://github.com/swiftdev), [Author 2](https://github.com/swiftdev)
+* Authors: [Dante Broggi](https://github.com/Dante-Broggi)
 * Review Manager: TBD
 * Status: **Awaiting implementation**
 
@@ -15,26 +15,24 @@
 
 ## Introduction
 
-A short description of what the feature is. Try to keep it to a
-single-paragraph "elevator pitch" so the reader understands what
-problem this proposal is addressing.
+Currently the Collection protocols express the assumption that all collections require an explicit linear order for their elements, despite the fact that the swift standard library has two types that violate that assumption, namely `Set` and `Dictionary`. This proposal fixes that, by adding an `UnorderedCollection` between `Sequence` and `Collection`, or if the `Iterable` proposal is accepted, then `UnorderedCollection` will inherit from `Iterable` and `Collection` will inherit from both `UnorderedCollection` and `Sequence`.
 
 Swift-evolution thread: [Discussion thread topic for that proposal](https://lists.swift.org/pipermail/swift-evolution/)
 
 ## Motivation
 
-Describe the problems that this proposal seeks to address. If the
-problem is that some common pattern is currently hard to express, show
-how one can currently get a similar effect and describe its
-drawbacks. If it's completely new functionality that cannot be
-emulated, motivate why this new functionality would help Swift
-developers create better Swift code.
+Unordered collections such as `Set` and `Dictionary` currently are forced to have `first` and `last` properties, despite the fact that the implementations of these properties in those types reflect implementation details that should ideally be hidden, and fail to have the semantics that should be guaranteed by `Collection`, but has not been explicitly described to permit these types to fall through the cracks, namely that equal collections have equal first, last and gennerally nth elements<!-- (NOTE: collections that satisfy this condition need not be equal, it is a necessary, but certainly not sufficient condition) -->.
+
+This means that programmers passing such unordered collections to collection generic functions or extensions must be vigilant to ensure the function or extension only uses properties that their unordered collection type has implemented with semantics close enough to the semantics that collection should require.
 
 ## Proposed solution
 
-Describe your solution to the problem. Provide examples and describe
-how they work. Show how your solution is better than current
-workarounds: is it cleaner, safer, or more efficient?
+Add an `UnorderedCollection` between `Sequence` and `Collection`,
+	or if the `Iterable` proposal is accepted, then `UnorderedCollection`
+	will inherit from `Iterable` and `Collection` will inherit from both `UnorderedCollection` and `Sequence`.
+This protocol will extract the requirements of `Collection` that do not imply a definitive order, and what automatic generic functionality is able to be implemented against the weaker constraints.
+
+Add stricter semantic conditions to `Collection` to emphasize the new distinction between `UnorderedCollection` and `Collection`.
 
 ## Detailed design
 
@@ -47,53 +45,15 @@ reasonably implement the feature.
 
 ## Source compatibility
 
-Relative to the Swift 3 evolution process, the source compatibility
-requirements for Swift 4 are *much* more stringent: we should only
-break source compatibility if the Swift 3 constructs were actively
-harmful in some way, the volume of affected Swift 3 code is relatively
-small, and we can provide source compatibility (in Swift 3
-compatibility mode) and migration.
-
-Will existing correct Swift 3 or Swift 4 applications stop compiling
-due to this change? Will applications still compile but produce
-different behavior than they used to? If "yes" to either of these, is
-it possible for the Swift 4 compiler to accept the old syntax in its
-Swift 3 compatibility mode? Is it possible to automatically migrate
-from the old syntax to the new syntax? Can Swift applications be
-written in a common subset that works both with Swift 3 and Swift 4 to
-aid in migration?
+This proposal has no source concerns. However, there is some new semantic requirements on `Collection`, but only ones most people (TODO: FIXME: check if possible) probably were implementing anyways, or they were aware they were deviating from standard. The stdlib violations of the new semantic requirements, will have been fixed by this proposal.
 
 ## Effect on ABI stability
 
-Does the proposal change the ABI of existing language features? The
-ABI comprises all aspects of the code generation model and interaction
-with the Swift runtime, including such things as calling conventions,
-the layout of data types, and the behavior of dynamic features in the
-language (reflection, dynamic dispatch, dynamic casting via `as?`,
-etc.). Purely syntactic changes rarely change existing ABI. Additive
-features may extend the ABI but, unless they extend some fundamental
-runtime behavior (such as the aforementioned dynamic features), they
-won't change the existing ABI.
-
-Features that don't change the existing ABI are considered out of
-scope for [Swift 4 stage 1](README.md). However, additive features
-that would reshape the standard library in a way that changes its ABI,
-such as [where clauses for associated
-types](https://github.com/apple/swift-evolution/blob/master/proposals/0142-associated-types-constraints.md),
-can be in scope. If this proposal could be used to improve the
-standard library in ways that would affect its ABI, describe them
-here.
+This proposal has no ABI concerns.
 
 ## Effect on API resilience
 
-API resilience describes the changes one can make to a public API
-without breaking its ABI. Does this proposal introduce features that
-would become part of a public API? If so, what kinds of changes can be
-made without breaking ABI? Can this feature be added/removed without
-breaking ABI? For more information about the resilience model, see the
-[library evolution
-document](https://github.com/apple/swift/blob/master/docs/LibraryEvolution.rst)
-in the Swift repository.
+This proposal changes API in a compatible way: inserting a new protocol in a tree.
 
 ## Alternatives considered
 
