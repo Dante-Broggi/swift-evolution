@@ -15,11 +15,10 @@
 
 ## Introduction
 
-`Sequence` is currently the root protocol for allowing a type to be used in a `for in` loop.
-However, dispite not guaranteeing anything more, it's name and helper functions imply such.
-Thus, it is proposed we lift the core functionality to a new protocol with a new name: `Iterable`
-and add guarantees to `Sequence` that the helper functions were assuming.
-Additionaly, this proposal suggests the possibility of requiring Iterators (`IteratorProtocol`) to conform to `Sequence`, permitting anyone to recover a `Sequence` from an `Iterable` by explicitly requesting the type impose an order on it's elements by calling `makeIterator()`.
+`Sequence` is currently the root protocol for allowing a type to be used in
+a `for in` loop. However, dispite not guaranteeing anything more, it's name and helper functions imply that a `Sequence` should have an intrinsic order.
+Thus, it is proposed we lift the core functionality to a new protocol
+with a new name: `Iterable` and add guarantees to match what the helper functions imply already hold. Additionaly, this proposal suggests the possibility of requiring Iterators (`IteratorProtocol`) of `Sequences` to conform to `Sequence` themselves.
 
 Swift-evolution thread: [Discussion thread topic for that proposal](https://lists.swift.org/pipermail/swift-evolution/)
 
@@ -27,12 +26,12 @@ Swift-evolution thread: [Discussion thread topic for that proposal](https://list
 
 This proposal seeks to separate the idea that an instance has elements one can iterate through, and the assumption that the provided order has any semantic meaning other than that imposed by the iteration being, an inherently linear proccess.
 
-In addition, because there is no syntactic differences between the new `Iterable` and `Sequence`, if a type conforms to `Iterable` and not `Sequence`, it must be because there is no inherent order in the data being iterated over, thus it is unwise for the body of the loop to depend upon this order, and thus, the compiler can, possibly, verify this lack-of-a-guarantee with warnings or even errors.
+In addition, because there is no syntactic differences between the new `Iterable` and `Sequence`, if a type conforms to `Iterable` and not `Sequence`, it must be because there is no inherent order in the data being iterated over, thus it is unwise for the body of the loop to depend upon such an order, and thus, the compiler can, possibly, verify this lack-of-a-guarantee with warnings or even errors.
 
 ## Proposed solution
 
-This proposal adds a new protocol `Iterable` that takes on `Sequence`'s compiler visible role, and to which the latter conforms, and, if desired, two example `Iterable`s. The example `Iterable` but not `Sequence` types are wrappers, one arround `arc4random_uniform(:)` and the other arround an arbatrary Base `Iterable` that uses nondeterminism to verify that whatever the Base is, it itself does not heed any guarantees one would expect from a `Sequence`. 
-And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requested, than that shall be done as well, and the default implementation for Iterator-Sequences shall have the `where Self: Sequence` removed.
+This proposal adds a new protocol `Iterable` that takes on `Sequence`'s compiler visible role, and from which the latter inherits, and, if desired, two utility `Iterable`s. The example `Iterable` but not `Sequence` types are wrappers, one arround `arc4random_uniform(:)` and the other arround an arbatrary Base `Iterable` that uses nondeterminism to verify that whatever the Base is, it itself does not heed any additional order guarantees, such as those from `Sequence`.
+And, if requiring a `Sequence`'s Iterator (`IteratorProtocol`) to conform to `Sequence` is desired, than that shall be done as well.
 
 ## Detailed design
 
@@ -55,7 +54,7 @@ And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requ
 /// of operations that you can perform on any iterable. As an example, to
 /// check whether an iterable includes a particular value, you can test each
 /// value sequentially until you've found a match or reached the end of the
-/// Iterable's iterator. This example checks to see whether a particular 
+/// Iterable's iterator. This example checks to see whether a particular
 /// insect is in an array.
 ///
 ///     let bugs = ["Aphid", "Bumblebee", "Cicada", "Damselfly", "Earwig"]
@@ -72,7 +71,7 @@ And, if reqiring Iterators (`IteratorProtocol`) to conform to `Sequence` is requ
 /// The `Iterable` protocol provides default implementations for many common
 /// operations that depend on sequential access to a sequence's values. For
 /// clearer, more concise code, the example above could use the array's
-/// `contains(_:)` method, which performs the iteration for you 
+/// `contains(_:)` method, which performs the iteration for you
 /// as every iterable inherits it from `Iterable` instead of iterating manually:
 ///
 ///     if bugs.contains("Mosquito") {
@@ -233,14 +232,14 @@ protocol Iterable /*: Compiler_ForIn_Able*/ {
   ///
   /// - Parameter body: A closure that takes an element of the sequence as a
   ///   parameter.
-  func forEach(_ body: (Element) throws -> Void) rethrows  
+  func forEach(_ body: (Element) throws -> Void) rethrows
 }
 
 ///...
 /// Ordered Access
 /// ===============
 ///
-/// The `Sequence` protocol requires conforming types have an order that is 
+/// The `Sequence` protocol requires conforming types have an order that is
 /// preserved by equality. As a consequence, one whether or not one element
 /// preceeds annother is a sensible question. for example, even if a `.copy()`
 /// method exists with expected semantics (and Element is Equatable):
@@ -272,7 +271,7 @@ struct UniformRandomNumbers: Iterable, Iterator {
     _difference = max - min
     precondition(_differance <= UInt32.max, "Implementation requires (max-min) to fit in a UInt32")
   }
-  
+
   mutating func next() -> Int? {
     return Int(arc4random_uniform(numericCast(_difference))) + _min
   }
@@ -281,11 +280,11 @@ struct UniformRandomNumbers: Iterable, Iterator {
 struct LazilyRandomise<Base: Iterable>: Iterable {
   typealias Element = Base.Element
   var _base: Base
-  
+
   init(_ b: Base) {
     _base = b
   }
-  
+
   func makeIterator() -> Iterator {
     return LazilyRandomiseIterator(b)
   }
@@ -295,13 +294,13 @@ struct LazilyRandomiseIterator<Base: Iterable>: Iterable {
   typealias Element = Base.Element
   var _base: Base.Iterator
   var _buf1, _buf2: Element?
-  
+
   init(_ b: Base.) {
     _base = b.makeIterator()
     _buf1 = _base.next()
   }
-  
-  ///FIXME: Implementation wrong, use 2+ element buffer, currently the 
+
+  ///FIXME: Implementation wrong, use 2+ element buffer, currently the
   ///last element of base is always the last element of self!
   func next() -> Element {
     guard let n = _base.next() else {
@@ -318,7 +317,7 @@ struct LazilyRandomiseIterator<Base: Iterable>: Iterable {
 
 ## Source compatibility
 
-This proposal has no source concerns. However, there is some new semantic requirements on `Sequence`, but only ones most people (TODO: FIXME: check if possible) probably were implementing anyways, or they were aware they were deviating from standard. The stdlib violations of the new semantic requirements, namely `Set` and `Dictionary` will be fixed when we extend the distinction between order being a public guarantee and being a private implementation detail further down the `Collection` protocol tree in later proposals.
+This proposal has no source concerns. However, there is some new semantic requirements on `Sequence`, but only ones most people (TODO: FIXME: check if possible) probably were implementing anyways, or they were aware they were deviating from standard. The stdlib violations of the new semantic requirements, namely `Set` and `Dictionary` will be fixed if and when we extend the distinction between order being a public guarantee and being a private implementation detail further down the `Collection` protocol tree in later proposals.
 
 ## Effect on ABI stability
 
