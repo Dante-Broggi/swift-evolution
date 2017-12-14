@@ -239,9 +239,18 @@ public protocol UnorderedCollection: Sequence { //Iterable
 ///...
 public protocol Collection: OrderedCollection, Sequence {
 
+	///...
+
     /// The first element of the collection.
     ///
-    /// Two equal colections (a, b) must have a.first == b.first return true
+    /// Two equal colections must have equal first elements.
+    /// ```swift
+    /// let a, b : Collection
+    /// ...
+    /// if a == b {
+    /// 	assert(a.first == b.first)
+    /// }
+    /// ```
     ///
     /// If the collection is empty, the value of this property is `nil`.
     ///
