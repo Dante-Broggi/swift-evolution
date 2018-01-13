@@ -236,10 +236,76 @@ public protocol UnorderedCollection: Sequence { //Iterable
     var count: Int { get }
 }
 
-///...
-public protocol Collection: OrderedCollection, Sequence {
+/// An unordered collection that supports subscript assignment.
+///
+/// collections that conform to `MutableUnorderedCollection` gain the ability to
+/// change the value of their elements. This example shows how you can
+/// modify one of the names in an array of students.
+///
+///     var students = ["Ben", "Ivy", "Jordell", "Maxime"]
+///     if let i = students.index(of: "Maxime") {
+///         students[i] = "Max"
+///     }
+///     print(students)
+///     // Prints "["Ben", "Ivy", "Jordell", "Max"]"
+///
+/// Conforming to the MutableUnorderedCollection Protocol
+/// ============================================
+///
+/// To add conformance to the `MutableUnorderedCollection` protocol to your own
+/// custom collection, upgrade your type's subscript to support both read
+/// and write access.
+///
+/// A value stored into a subscript of a `MutableUnorderedCollection`
+/// instance must subsequently be accessible at that same position.
+/// That is, for a mutable collection instance `a`, index `i`, and value `x`,
+/// the two sets of assignments in the following code sample must be equivalent:
+///
+///     a[i] = x
+///     let y = a[i]
+///
+///     // Must be equivalent to:
+///     a[i] = x
+///     let y = x
+public protocol MutableUnorderedCollection: UnorderedCollection {
 
-	///...
+  /// Accesses the element at the specified position.
+  ///
+  /// For example, you can replace an element of an array by using its
+  /// subscript.
+  ///
+  ///     var streets = ["Adams", "Bryant", "Channing", "Douglas", "Evarts"]
+  ///     streets[1] = "Butler"
+  ///     print(streets[1])
+  ///     // Prints "Butler"
+  ///
+  /// You can subscript a collection with any valid index other than the
+  /// collection's end index. The end index refers to the position one
+  /// past the last element of a collection, so it doesn't correspond with an
+  /// element.
+  ///
+  /// - Parameter position: The position of the element to access. `position`
+  ///   must be a valid index of the collection that is not equal to the
+  ///   `endIndex` property.
+  subscript(position: Index) -> Element { get set }
+
+  /// Exchanges the values at the specified indices of the collection.
+  ///
+  /// Both parameters must be valid indices of the collection and not
+  /// equal to `endIndex`. Passing the same index as both `i` and `j` has no
+  /// effect.
+  ///
+  /// - Parameters:
+  ///   - i: The index of the first value to swap.
+  ///   - j: The index of the second value to swap.
+  mutating func swapAt(_ i: Index, _ j: Index)
+}
+
+///...
+public protocol Collection:
+	OrderedCollection, Sequence where SubSequence: Collection {
+
+		///...
 
     /// The first element of the collection.
     ///
@@ -262,6 +328,12 @@ public protocol Collection: OrderedCollection, Sequence {
     var first: Element? { get }
 
     ///...
+}
+
+///...
+public protocol MutableCollection: Collection, MutableUnorderedCollection
+where SubSequence: MutableCollection {
+	///...
 }
 ```
 
