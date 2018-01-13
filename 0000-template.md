@@ -15,20 +15,24 @@
 
 ## Introduction
 
-`Sequence` is currently the root protocol for allowing a type to be used in
-a `for in` loop. However, dispite not guaranteeing anything more, it's name and helper functions imply that a `Sequence` should have an intrinsic order.
-Thus, it is proposed we lift the core functionality to a new protocol
-with a new name: `Iterable` and add guarantees to match what the helper functions imply already hold. Additionaly, this proposal suggests the possibility of requiring Iterators (`IteratorProtocol`) of `Sequences` to conform to `Sequence` themselves.
+Most "Syntax implementation" protocols provide only minimal guarantees on the
+semantics of their requirements. These protocols instead implicitly imply
+semantic meanings that people believe these types `should` have, whether or not they actually do, which is usually fine, but currently at least 2 types (`Set` and `Dictionary`) which strongly violate the implied semantics of the syntax protocol `Sequence`.
 
 Swift-evolution thread: [Discussion thread topic for that proposal](https://lists.swift.org/pipermail/swift-evolution/)
 
 ## Motivation
 
-This proposal seeks to separate the idea that an instance has elements one can iterate through, and the assumption that the provided order has any semantic meaning other than that imposed by the iteration being, an inherently linear proccess.
+`Sequence` is currently the root protocol for allowing a type to be used in
+a `for in` loop. However, dispite not guaranteeing anything more, it's name and helper functions imply that a `Sequence` should have an intrinsic order.
+Thus, it is proposed we lift the core functionality to a new protocol
+with a new name: `Iterable` and add guarantees to match what the helper functions imply already hold.
 
-In addition, because there is no syntactic differences between the new `Iterable` and `Sequence`, if a type conforms to `Iterable` and not `Sequence`, it must be because there is no inherent order in the data being iterated over, thus it is unwise for the body of the loop to depend upon such an order, and thus, the compiler can, possibly, verify this lack-of-a-guarantee with warnings or even errors.
+Additionally, this proposal suggests the possibility of requiring Iterators (`IteratorProtocol`) of `Sequences` to conform to `Sequence` themselves.
 
 ## Proposed solution
+
+This proposal seeks to separate the idea that an instance has elements one can iterate through, and the assumption that the provided order has any semantic meaning other than that imposed by the iteration being, an inherently linear proccess.
 
 This proposal adds a new protocol `Iterable` that takes on `Sequence`'s compiler visible role, and from which the latter inherits, and, if desired, two utility `Iterable`s. The example `Iterable` but not `Sequence` types are wrappers, one arround `arc4random_uniform(:)` and the other arround an arbatrary Base `Iterable` that uses nondeterminism to verify that whatever the Base is, it itself does not heed any additional order guarantees, such as those from `Sequence`.
 And, if requiring a `Sequence`'s Iterator (`IteratorProtocol`) to conform to `Sequence` is desired, than that shall be done as well.
@@ -301,7 +305,7 @@ struct LazilyRandomiseIterator<Base: Iterable>: Iterable {
   }
 
   ///FIXME: Implementation wrong, use 2+ element buffer, currently the
-  ///last element of base is always the last element of self!
+  ///last element of base is always the last element of self (!)
   func next() -> Element {
     guard let n = _base.next() else {
       return _buf1
@@ -331,4 +335,11 @@ This proposal changes API in a compatible way: extracting a new root for a proto
 ## Alternatives considered
 
 Do nothing, and live with the ambiguity between iteration order being guaranteed or an implementation detail in `Sequence`
+
+## Future Directions
+
+* Extend the order-iness distinction along the protocol tree
+	- Explored in ???
+* Create a diverging protocol tree guaranteeing unspecified access,
+	and providing functions for parallel access to elements.
 
