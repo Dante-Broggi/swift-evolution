@@ -15,7 +15,13 @@
 
 ## Introduction
 
-Currently the Collection protocols express the assumption that all collections require an explicit linear order for their elements, despite the fact that the swift standard library has two types that violate that assumption, namely `Set` and `Dictionary`. This proposal fixes that, by adding an `UnorderedCollection` between `Sequence` and `Collection`, or if the `Iterable` proposal is accepted, then `UnorderedCollection` will inherit from `Iterable` and `Collection` will inherit from both `UnorderedCollection` and `Sequence`.
+Currently the Collection protocols express the assumption that all collections require an explicit linear order for their elements, despite the fact that the swift standard library has two types that violate that assumption, namely `Set` and `Dictionary`. This proposal fixes that assumption.
+
+This proposal does not, however, actually cause the standard library to adopt these protocols, except by protocol inheritance.
+
+This proposal adds `Iterable` to take over `Sequence`'s role as the "Syntax implementation" protocol for for-in loops, because `Sequence` has a name that implies that it guarantees more behavior than it does.
+
+`Collection` and `MutableCollection` both also have unordered counterparts, from which as much order-agnostic API is extracted.
 
 Swift-evolution thread: [Discussion thread topic for that proposal](https://lists.swift.org/pipermail/swift-evolution/)
 
