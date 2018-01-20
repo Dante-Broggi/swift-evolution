@@ -21,18 +21,31 @@ Swift-evolution thread: [Discussion thread topic for that proposal](https://list
 
 ## Motivation
 
-Unordered collections such as `Set` and `Dictionary` currently are forced to have `first` and `last` properties, despite the fact that the implementations of these properties in those types reflect implementation details that should ideally be hidden, and fail to have the semantics that should be guaranteed by `Collection`, but has not been explicitly described to permit these types to fall through the cracks, namely that equal collections have equal first, last and gennerally nth elements<!-- (NOTE: collections that satisfy this condition need not be equal, it is a necessary, but certainly not sufficient condition) -->.
+Unordered collections such as `Set` and `Dictionary` currently are forced to have a `first` property, and sometimes a `last` property, despite the fact that the implementations of those properties in such types reflect implementation details that should ideally be hidden, and fail to preserve semantics that should be guaranteed by `Collection`, but has not been explicitly required to permit these types to fall through the cracks, namely that equal collections have equal first, last and gennerally nth elements<!-- (NOTE: collections that satisfy this condition need not be equal, it is a necessary, but not sufficient condition for equality) -->.
+
+This is primarily because although `Sequence` is currently the root protocol for allowing a type to be used in a `for in` loop, it's name and helper functions imply that a `Sequence` should have an intrinsic order despite it not having any greater guarantees.
 
 This means that programmers passing such unordered collections to collection generic functions or extensions must be vigilant to ensure the function or extension only uses properties that their unordered collection type has implemented with semantics close enough to the semantics that collection should require.
 
 ## Proposed solution
 
-Add an `UnorderedCollection` between `Sequence` and `Collection`,
-	or if the `Iterable` proposal is accepted, then `UnorderedCollection`
-	will inherit from `Iterable` and `Collection` will inherit from both `UnorderedCollection` and `Sequence`.
-This protocol will extract the requirements of `Collection` that do not imply a definitive order, and what automatic generic functionality is able to be implemented against the weaker constraints.
+This proposal seeks to separate the idea that an instance has elements one can iterate through, and the assumption that the provided order has any semantic meaning other than that imposed by the iteration being an inherently linear proccess.
 
-Add stricter semantic conditions to `Collection` to emphasize the new distinction between `UnorderedCollection` and `Collection`.
+This proposal adds two new protocols `Iterable` and `UnorderedCollection`:
+
+- `Iterable` takes on `Sequence`'s compiler visible role
+- `UnorderedCollection` which will inherit from `Iterable`
+	- and extract the requirements of `Collection` that do not imply a definitive order
+- `MutableUnorderedCollection` which will inherit from `UnorderedCollection`
+	- and extract the requirements of `MutableCollection` that do not imply a definitive order
+
+In addition the inheritance tree and requirements of `Sequence` and `Collection`
+
+- `Sequence` shall now inherit from `Iterable`
+	- Substitutable `Sequences`  must now have equivalent iteration orders.
+- `Collection` shall now inherit from both `UnorderedCollection` and `Sequence`.
+	- Substitutable `Collections`  must now have equivalent nth elements.
+- `MutableCollection` shall now inherit from both `MutableUnorderedCollection` and `Collection`.
 
 ## Detailed design
 
