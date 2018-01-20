@@ -367,6 +367,44 @@ protocol Sequence: Iterable {
 ///     // Prints "f"
 ///     // Prints "t"
 ///
+/// Ordered Access
+/// ===============
+///
+/// The `Iterable` protocol makes no requirement on conforming types regarding
+/// whether they have a standardized, or even deterministic iteration order.
+/// However, it does gaurantee that if it's iterator's `.next()` is caled until
+/// it returns `nil` it will return each element exactly once for each time the
+/// iterable contains that element. As a consequence, don't assume that whether
+/// or not one element preceeds annother is a sensible question. for example, even
+/// if a `.copy()` method exists with expected semantics (and Element is Equatable):
+///
+///     let a, b: type(of: iterable).Element
+///
+///     for element in iterable.copy() {
+///         a = element
+///         break
+///     }
+///
+///     for element in iterable {
+///         b = element
+///         break
+///     }
+///
+///     // No defined behavior
+///     if a == b {
+///         ...
+///     } else {
+///         ...
+///     }
+///
+/// In this case, you cannot assume either an iterable is a sequence and the
+/// elements will be equal, or that an iterable will have been reordered and
+/// the elements will be unequal. A conforming iterable that is
+/// not a sequence is allowed to produce elements in an arbitrary order.
+///
+/// To establish that a type you've created has an iteration order that is
+/// preserved by equality, add conformance to the `Sequence` protocol.
+///
 /// Conforming to the UnorderedCollection Protocol
 /// =====================================
 ///
@@ -488,6 +526,44 @@ public protocol UnorderedCollection: Sequence { //Iterable
 ///     print(students)
 ///     // Prints "["Ben", "Ivy", "Jordell", "Max"]"
 ///
+/// Ordered Access
+/// ===============
+///
+/// The `Iterable` protocol makes no requirement on conforming types regarding
+/// whether they have a standardized, or even deterministic iteration order.
+/// However, it does gaurantee that if it's iterator's `.next()` is caled until
+/// it returns `nil` it will return each element exactly once for each time the
+/// iterable contains that element. As a consequence, don't assume that whether
+/// or not one element preceeds annother is a sensible question. for example, even
+/// if a `.copy()` method exists with expected semantics (and Element is Equatable):
+///
+///     let a, b: type(of: iterable).Element
+///
+///     for element in iterable.copy() {
+///         a = element
+///         break
+///     }
+///
+///     for element in iterable {
+///         b = element
+///         break
+///     }
+///
+///     // No defined behavior
+///     if a == b {
+///         ...
+///     } else {
+///         ...
+///     }
+///
+/// In this case, you cannot assume either an iterable is a sequence and the
+/// elements will be equal, or that an iterable will have been reordered and
+/// the elements will be unequal. A conforming iterable that is
+/// not a sequence is allowed to produce elements in an arbitrary order.
+///
+/// To establish that a type you've created has an iteration order that is
+/// preserved by equality, add conformance to the `Sequence` protocol.
+///
 /// Conforming to the MutableUnorderedCollection Protocol
 /// ============================================
 ///
@@ -541,8 +617,30 @@ public protocol MutableUnorderedCollection: UnorderedCollection {
 }
 
 ///...
+/// Ordered Access
+/// ===============
+///
+/// The `Sequence` protocol requires conforming types have an order that is
+/// preserved by equality. As a consequence, one whether or not one element
+/// preceeds annother is a sensible question. for example, even if a `.copy()`
+/// method exists with expected semantics (and Element is Equatable):
+///
+///     let a, b: type(of: sequence).Element
+///
+///     for element in sequence.copy() {
+///         a = element
+///         break
+///     }
+///
+///     for element in sequence {
+///         b = element
+///         break
+///     }
+///
+///     assert(a == b, "\(sequence) is not a valid Sequence")
+///...
 public protocol Collection:
-	OrderedCollection, Sequence where SubSequence: Collection {
+	UnorderedCollection, Sequence where SubSequence: Collection {
 
 		///...
 
