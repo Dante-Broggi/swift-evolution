@@ -24,7 +24,11 @@ This proposal adds `Iterable` to take over `Sequence`'s role as the "Syntax impl
 `Collection` and `MutableCollection` both also have unordered counterparts, from which as much order-agnostic API is extracted.
 
 Swift-evolution thread: [Discussion thread topic for that proposal](https://lists.swift.org/pipermail/swift-evolution/)
+<!-- First, we have tried not to create any distinct protocols with identical syntactic requirements, because we think it makes the world clearer; we think people are more likely to assign incorrect protocols when all the operations they want are available, but don’t have the right semantics. That isn’t to say we shouldn’t start doing it, but it would be a break from the past.
 
+Higher protocol granularity has a high comprehensibility cost. Distinguishing protocols based on semantic requirements alone may make the library harder to understand. I’ve heard some people’s heads have exploded from simply encountering CollectionType.
+
+Next, it’s a principle of generic programming that every protocol should be justified by both algorithms that exploit its requirements (e.g. extension methods) and some real-world models that can’t reasonably also conform to a more-refined protocol. For example, we have a ForwardIndexType because a singly-linked list has multipass forward traversal and can’t do bidirectional traversal. In order to evaluate any proposal for new protocols, we’d need to see all of these things. -->
 ## Motivation
 
 Unordered collections such as `Set` and `Dictionary` currently are forced to have a `first` property, and sometimes a `last` property, despite the fact that the implementations of those properties in such types reflect implementation details that should ideally be hidden, and fail to preserve semantics that should be guaranteed by `Collection`, but has not been explicitly required to permit these types to fall through the cracks, namely that equal collections have equal first, last and gennerally nth elements<!-- (NOTE: collections that satisfy this condition need not be equal, it is a necessary, but not sufficient condition for equality) -->.
