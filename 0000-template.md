@@ -21,6 +21,8 @@ This proposal does not, however, actually cause the standard library to adopt th
 
 This proposal adds `Iterable` to take over `Sequence`'s role as the "Syntax implementation" protocol for for-in loops, because `Sequence` has a name that implies that it guarantees more behavior than it does.
 
+`Iterable`, in particular, will have no use on its own in generic programming, without a more constrained protocol, but being solely a "bag of syntax" means non-stdlib protocols can inherit form it to get `for-in` syntax without any undesired semantic requirements or implications.
+
 `Collection` and `MutableCollection` both also have unordered counterparts, from which as much order-agnostic API is extracted.
 
 Swift-evolution thread: [Discussion thread topic for that proposal](https://lists.swift.org/pipermail/swift-evolution/)
@@ -35,7 +37,9 @@ Unordered collections such as `Set` and `Dictionary` currently are forced to hav
 
 This is primarily because although `Sequence` is currently the root protocol for allowing a type to be used in a `for in` loop, it's name and helper functions imply that a `Sequence` should have an intrinsic order despite it not having any greater guarantees.
 
-This means that programmers passing such unordered collections to collection generic functions or extensions must be vigilant to ensure the function or extension only uses properties that their unordered collection type has implemented with semantics close enough to the semantics that collection should require.
+This means that programmers passing such unordered collections to collection generic functions or extensions must be vigilant to ensure the function or extension only uses properties that their unordered collection type has implemented with semantics close enough to the semantics that collection should require
+
+In addition, in the continually recurrent discussion on `ValueEnumerable` [SE-0194](https://github.com/apple/swift-evolution/blob/master/proposals/0194-derived-collection-of-enum-cases.md), The particular order to use: whether source, discriminator value, or some other order, has been heavily discussed. This proposal suggests another option, that of having the order be arbitrary, and implementation defined.
 
 ## Proposed solution
 
