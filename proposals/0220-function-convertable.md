@@ -1,7 +1,7 @@
 # Function Convertable Types
 
 * Proposal: [SE-NNNN](NNNN-function-convertable.md)
-* Authors: [Author 1](https://github.com/dante-broggi)<!--, [Author 2](https://github.com/swiftdev)-->
+* Authors: [Dante Broggi](https://github.com/dante-broggi)<!--, [Author 2](https://github.com/swiftdev)-->
 * Review Manager: TBD
 * Status: **Awaiting implementation**
 
@@ -15,12 +15,12 @@
 
 ## Introduction
 
-This proposal adds the ability for arbatrary types to be used as functions, either directly or being passed as one.
+This proposal adds the ability for arbatrary types to be used as functions, either directly or being passed as one, and adds this new capability to keypaths.
 
 Suggested in the [Dynamically Callable](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615) thread [here](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615/5)
 The name `_` was suggested [here](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615/51), in the same thread.
 
-Swift-evolution thread: [Discussion thread topic for that proposal](https://forums.swift.org/)
+Swift-evolution thread: [Function Convertable Types](https://forums.swift.org/)
 
 ## Motivation
 
@@ -32,7 +32,7 @@ This use can be approximated either by having overloads of the numerous function
 #warning("Insert examples here")
 ```
 
-Other examples where this feature would be usefull include the use of methods of the form `func _()` to create concice, and probably easily identifiable <!-- FIXME: word choice -->syntax for resolving `Result` and `Future`  into their values.
+Other examples where this feature would be usefull include the use of methods of the form `func _()` to create concice, and probably easily identifiable <!-- FIXME: word choice -->syntax for resolving `Result` , `Future` and similar types into their values.
 
 ```swift
 #warning("Insert examples here")
@@ -45,7 +45,7 @@ While this proposal doesn't express these automatically, it does reduce the boil
 
 This use can be approximated by having a wraper type arround the desired function, conforming to the protocols and exposing the properties one disires, but one needs either an operator or method to convert the wrapper into a function for use, which is again boilerplate without good syntax.
 
-Finally, this feature would potentially permit features like pure functions and compiler exaluatable functions to be expressed as compiler generated protocols instead of `@attribute`s if desired. 
+<!--Finally, this feature would potentially permit features like pure functions and compiler evaluatable functions to be expressed as compiler generated protocols instead of `@attribute`s if desired. -->
 
 ```swift
 #warning("Insert examples here")
@@ -67,6 +67,7 @@ Additionally, to preserve type recovery, any function may be dynamically downcas
 ### Standard Library modification
 
 The keypath types will get `_` named methods from `Base` to `Target` etc. 
+
 ```swift
 #warning("Insert new API here")
 ```
@@ -100,6 +101,14 @@ This should be purely source-additive
 
 * Methods will be able to be named `_`, these methods will obey all of the normal method resiliance requirements and capabilities.
 * The new methods on the keypath types will be adding to the Standard Library API and ABI.
+
+## Future directions
+
+* Permit adding `static func _`, aka permitting call syntax on metatypes to be overloaded.
+
+* Use methods of the form `func _()`, if or when `Result` or `Future` types are added to the Standard Library.
+
+* Replacing  `@autoclosure () -> T` syntax with `Autoclosure<T>` syntax, potentialy wth an `ExpressibleWithExpressionOf<T>` parameterized protocol, which would lift `Autoclosure<T>` out of bing a special case in the compiler and remove the amiguity of "can I put a parameter for the autoclosure".
 
 ## Alternatives considered
 
