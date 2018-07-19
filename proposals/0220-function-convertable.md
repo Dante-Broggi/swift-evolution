@@ -17,7 +17,7 @@
 
 This proposal adds the ability for arbatrary types to be used as functions, either directly or being passed as one.
 
-Suggested in the [Dynamically Callable]() thread [here](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615/5)
+Suggested in the [Dynamically Callable](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615) thread [here](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615/5)
 The name `_` was suggested [here](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615/51), in the same thread.
 
 Swift-evolution thread: [Discussion thread topic for that proposal](https://forums.swift.org/)
