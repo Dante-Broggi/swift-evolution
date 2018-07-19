@@ -1,7 +1,7 @@
 # Function Convertable Types
 
-* Proposal: [SE-0220](0220-function-convertable.md)
-* Authors: [Author 1](https://github.com/swiftdev)<!--, [Author 2](https://github.com/swiftdev)-->
+* Proposal: [SE-NNNN](NNNN-function-convertable.md)
+* Authors: [Author 1](https://github.com/dante-broggi)<!--, [Author 2](https://github.com/swiftdev)-->
 * Review Manager: TBD
 * Status: **Awaiting implementation**
 
