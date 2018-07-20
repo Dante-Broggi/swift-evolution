@@ -117,7 +117,7 @@ This should be purely source-additive
 
 * Use methods of the form `func _()`, if or when `Result` or `Future` types are added to the Standard Library.
 
-* Replacing  `@autoclosure () -> T` syntax with `Autoclosure<T>` syntax, potentialy wth an `ExpressibleWithExpressionOf<T>` parameterized protocol, which would lift `Autoclosure<T>` out of bing a special case in the compiler and remove the amiguity of "can I put a parameter for the autoclosure".
+* Replacing  `@autoclosure () -> T` syntax with `Autoclosure<T>` syntax, potentialy wth an `ExpressibleWithExpressionOf<T>` parameterized protocol, which would lift `Autoclosure<T>` out of being a special case in the compiler and remove the amiguity of "can I put a parameter for the autoclosure".
 
 ## Alternatives considered
 
