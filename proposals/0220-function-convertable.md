@@ -17,14 +17,17 @@
 
 This proposal adds the ability for arbatrary types to be used as functions, either directly or being passed as one, and adds this new capability to keypaths.
 
-Suggested in the [Dynamically Callable](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615) thread [here](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615/5)
-The name `_` was suggested [here](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615/51), in the same thread.
+This proposal is the merger of two separately concieved ideas, the use of keypaths as functions, which <!--, I believe, -->was not formally proposed as it did not have good obvious syntax, although it had motivating examples, and non-dynamic custom callable types, suggested during the dynamically callable proposal, because that proposal was adding custom callable types for interop with other languages, without that capability being in Swift for itself first.
 
 Swift-evolution thread: [Function Convertable Types](https://forums.swift.org/)
 
 ## Motivation
 
 One feature oft mentioned as desireable is the ability to use a keypath as a function, most recently in the [Sort `Collection` using `KeyPath`](https://forums.swift.org/t/sort-collection-using-keypath/14554) thread [here](https://forums.swift.org/t/sort-collection-using-keypath/14554/2) but also in [KeyPath based map, flatMap, filter](https://forums.swift.org/t/pitch-keypath-based-map-flatmap-filter/6266) and elsewhere.
+
+This concept was suggested in the [Dynamically Callable](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615) thread [here](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615/5)
+The name `_` was suggested [here](https://forums.swift.org/t/se-0216-user-defined-dynamically-callable-types/13615/51), in the same thread.
+
 
 This use can be approximated either by having overloads of the numerous functions one would want to pass a keypath instead of a normal function or by having either an operator or method to convert a keypath into a function, which is boilerplate without good syntax.
 
@@ -56,13 +59,19 @@ This use can be approximated by having a wraper type arround the desired functio
 ### Function Convertability
 
 Any method (instance function), either declared in a type or extention, shall be permitted to, instead of an operator or identifier name, use the symbol `_`. 
-For the time being, `static` and `class` functions will not be permitted to be named `_`, as this would create potential ambiguity with implicit initializer calls that this proposal does not desire to resolve. However, a future proposal may lift this restriction.
+For the time being, `static` and `class` functions will not be permitted to be named `_`, as this would create potential ambiguity with the prexisting call syntax on metatypes that this proposal does not desire to resolve. However, a future proposal may lift this restriction. Such future work should keep in mind that call syntax on metatypes is already meaningful, both for implicit `init` calls and, after [SE-0213](https://github.com/apple/swift-evolution/blob/master/proposals/0213-literal-init-via-coercion.md), coersion from literals, and that ambiguity would have to be resolved somehow (e.g. through the most specific rule) or be subsumed.
 
 Any type: struct, enum, class, protocol, with at least one method with the name `_` is permitted to:
 * be called as if it were one of its methods so named
 * be considered a subtype of the type of each of its methods so named
 
 Additionally, to preserve type recovery, any function may be dynamically downcasted with `as?` or `as!` into any type which implements a method of name `_` of the same type as the function being casted, which will return the instance the function was converted from, if it was converted from an instance of the type being casted to.
+
+### Similarity to [SE-0216 Dynamically Callable](https://github.com/apple/swift-evolution/blob/master/proposals/0216-dynamic-callable.md)
+Although this feature is similar to the dynamically callable feature, it has significant differences, both mentioned here and in SE-0216. 
+In particular, the dynamically callable proposal had to be able to express methods where the number of arguments and their labels were not defined by the implementor of the method, but could require all of the method's arguments be the same type. Whereas this proposal must be able to express the entire spectrum of swift methods as instance calls, but does not need arbatrary argument labels.
+
+This proposal does require that, if a method named `_` is a visible member on an `@dynamicCallable` type, all applicable methods named `_`  will be prefered over the `dynamicallyCall` methods.
 
 ### Standard Library modification
 
