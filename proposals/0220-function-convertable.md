@@ -103,7 +103,7 @@ This should be purely source-additive
 ## Effect on ABI stability
 
 * A function name mangling for functions named `_` must be added.
-* The casting from a function instance into a type which may be the function's original type, *may* not be ABI changing, as the conversion of a type into a function *should* be ABI compatible with ordnary closures.
+* The casting from a function instance into a type which may be the function's original type, *may* not be ABI changing, as the conversion of a type into a function *should* be ABI compatible with ordinary closures.
 * In addition, it may be desireable to implement a `@convention`  to describe "a normal type" used as a function, separate from `@convention(swift)` the convention for normal swift functions, but in this draft that question is considered an implementation detail.
 
 ## Effect on API resilience
